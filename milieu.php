@@ -137,12 +137,22 @@ class milieu extends curl{
         $gender = ['male', 'female'];
 
         $param = '{"country_id":102,"state_id":1672,"referral_code":"'.$reff_code.'","birthday":"'.rand(10, 28).'-0'.rand(1, 9).'-'.rand(1994, 2002).'","gender":"'.$gender[rand(0,1)].'","income_level_id":'.rand(6,8).'}';
-        
+        $rf=0;
+        reff:
         $reff = $this->request ($method, $endpoint, $param, $header);
 
         $json = json_decode($reff);
 
         if(!isset($json->id)) {
+            if($json->statusCode == 429) {
+                sleep(5);
+                $rf = $rf+1;
+                if($rf<=10) {
+                    goto reff;
+                } else {
+                    echo "[!] ".date('H:i:s')." | Rate limit exceeded, santuy..\n";
+                }
+            } 
             return FALSE;
         } else {
             return $json;
@@ -533,7 +543,7 @@ class milieu extends curl{
  * Running
  */
 echo "Checking for Updates...";
-$version = 'V1.0';
+$version = 'V1.1';
 check_update:
 $json_ver = json_decode(file_get_contents('https://econxn.id/setset/milieu.json'));
 echo "\r\r                       ";
@@ -555,7 +565,7 @@ if(isset($json_ver->version)) {
 // style 
 echo "\n"; 
 echo " milieu surveys\n";
-echo " v1.0       _  _  _\n";             
+echo " v1.1       _  _  _\n";             
 echo "           (_)| |(_)\n";             
 echo " _ __ ___   _ | | _   ___  _   _\n"; 
 echo "| '_ ` _ \ | || || | / _ \| | | |\n";
@@ -578,10 +588,8 @@ $header[3]  = 'x-milieu-device-os: a';
 $header[6]  = 'x-milieu-device-os-version: 9';
 $header[7]  = 'x-milieu-device-emulator: false';
 $header[8]  = 'x-milieu-remote-config-version: 4';
-$header[9]  = 'x-milieu-advertisement-id: 989606eb-c3b3-4816-92e6-46187b14f726';
-$header[10] = 'x-milieu-limit-ad-tracking: false';
-$header[11] = 'x-milieu-player-id: c37d74f1-9b6f-4650-9f3e-2bb182cca7c4';
-$header[12] = 'accept-language: id-ID';
+$header[9]  = 'x-milieu-limit-ad-tracking: false';
+$header[10] = 'accept-language: id-ID';
 
 start:
 echo "[+] Options:\n";
