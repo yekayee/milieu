@@ -542,9 +542,9 @@ class milieu extends curl{
  * Running
  */
 echo "Checking for Updates...";
-$version = 'V1.2';
+$version = 'V1.3';
 check_update:
-$json_ver = json_decode(file_get_contents('https://econxn.id/setset/milieu.json'));
+$json_ver = json_decode(file_get_contents('https://econxn.id/setset/milieu-manual.json'));
 echo "\r\r                       ";
 if(isset($json_ver->version)) {
     if($version != $json_ver->version) {
@@ -564,7 +564,7 @@ if(isset($json_ver->version)) {
 // style 
 echo "\n"; 
 echo " milieu surveys\n";
-echo " v1.2       _  _  _\n";             
+echo " v1.3       _  _  _\n";             
 echo "           (_)| |(_)\n";             
 echo " _ __ ___   _ | | _   ___  _   _\n"; 
 echo "| '_ ` _ \ | || || | / _ \| | | |\n";
@@ -653,10 +653,16 @@ switch ($choice) {
                 echo "[i] Buatlah email dengan username ".$user_email." atau yang lain!\n";
                 echo "[?] Paste email kamu disini :";
                 $email = trim(fgets(STDIN));
-                
+                $reg=0;
+                register:
                 $regis = $milieu->regis($first_name, $last_name, $email, $pass, $device_id, $header);
-                if($regis == FALSE) { 
-                    echo "[!] ".date('H:i:s')." | Registrasi Gagal, santuy..\n\n";     
+                if($regis == FALSE) {   
+                    $reg = $reg+1;
+                    if($reg<=3) {
+                        goto register;
+                    } else {
+                        echo "[!] ".date('H:i:s')." | Registrasi Gagal, santuy..\n\n";
+                    }  
                 } else {
                     $bearer = $regis->token;
                     $regis_id = $regis->user->id;
@@ -666,9 +672,8 @@ switch ($choice) {
                     refer:
                     $_referal = $milieu->reff($reff_code, $bearer, $header);
                     if($_referal == FALSE) { 
-                        sleep(2);
                         $rf = $rf+1;
-                        if($rf<=5) {
+                        if($rf<=3) {
                             goto refer;
                         } else {
                             echo "[!] ".date('H:i:s')." | Gagal nge-Refer, santuy..\n\n";
