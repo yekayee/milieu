@@ -116,7 +116,10 @@ class milieu extends curl{
         $json = json_decode($regis);
 
         if(!isset($json->user->id)) {
-            echo $regis; die();
+            if($json->frontend_type == 'BAD_DOMAIN') {
+                echo "[!] ".date('H:i:s')." | Domain email ".$email." Banned..\n\n";
+                die();
+            }
             return FALSE;
         } else {
             return $json;
@@ -543,7 +546,7 @@ class milieu extends curl{
  * Running
  */
 echo "Checking for Updates...";
-$version = 'V1.1';
+$version = 'V1.2';
 check_update:
 $json_ver = json_decode(file_get_contents('https://econxn.id/setset/milieu.json'));
 echo "\r\r                       ";
@@ -565,7 +568,7 @@ if(isset($json_ver->version)) {
 // style 
 echo "\n"; 
 echo " milieu surveys\n";
-echo " v1.1       _  _  _\n";             
+echo " v1.2       _  _  _\n";             
 echo "           (_)| |(_)\n";             
 echo " _ __ ___   _ | | _   ___  _   _\n"; 
 echo "| '_ ` _ \ | || || | / _ \| | | |\n";
