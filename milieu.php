@@ -534,6 +534,7 @@ class milieu extends curl{
  */
 echo "Checking for Updates...";
 $version = 'V1.0';
+check_update:
 $json_ver = json_decode(file_get_contents('https://econxn.id/setset/milieu.json'));
 echo "\r\r                       ";
 if(isset($json_ver->version)) {
@@ -547,6 +548,8 @@ if(isset($json_ver->version)) {
             die();
         }
     }
+} else {
+    goto check_update;
 }
 
 // style 
