@@ -107,6 +107,8 @@ class milieu extends curl{
         
         $param = '{"email":"'.$email.'","password":"'.$pass.'","name_first":"'.$first_name.'","name_last":"'.$last_name.'","device_id":"'.$device_id.'","client_end":"mobile_consumer"}';
         
+        $reg=0;
+        regis:
         $regis = $this->request ($method, $endpoint, $param, $header);
 
         $json = json_decode($regis);
@@ -115,7 +117,25 @@ class milieu extends curl{
             if($json->frontend_type == 'BAD_DOMAIN') {
                 echo "[!] ".date('H:i:s')." | Domain email ".$email." Banned..\n\n";
                 die();
+            } elseif($json->frontend_type == 'EMAIL_EXIST') {
+                echo "[!] ".date('H:i:s')." | Email ".$email." telah terdaftar sebelumnya!\n";
+            } else {
+                sleep(3);
+                $reg = $reg+1;
+                if($reg<=3) {
+                    goto regis;
+                } else {
+                    if($json->statusCode == 429){
+                        sleep(5);
+                        $reg = $reg+1;
+                        if($reg<=10) {
+                            goto regis;
+                        }
+                    } 
+                    echo "[!] ".date('H:i:s')." | ".$json->message."\n";    
+                }
             }
+
             return FALSE;
         } else {
             return $json;
@@ -542,7 +562,7 @@ class milieu extends curl{
  * Running
  */
 echo "Checking for Updates...";
-$version = 'V1.3';
+$version = 'V1.4';
 check_update:
 $json_ver = json_decode(file_get_contents('https://econxn.id/setset/milieu-manual.json'));
 echo "\r\r                       ";
@@ -564,7 +584,7 @@ if(isset($json_ver->version)) {
 // style 
 echo "\n"; 
 echo " milieu surveys\n";
-echo " v1.3       _  _  _\n";             
+echo " v1.4       _  _  _\n";             
 echo "           (_)| |(_)\n";             
 echo " _ __ ___   _ | | _   ___  _   _\n"; 
 echo "| '_ ` _ \ | || || | / _ \| | | |\n";
@@ -653,31 +673,20 @@ switch ($choice) {
                 echo "[i] Buatlah email dengan username ".$user_email." atau yang lain!\n";
                 echo "[?] Paste email kamu disini :";
                 $email = trim(fgets(STDIN));
-                $reg=0;
-                register:
+
                 $regis = $milieu->regis($first_name, $last_name, $email, $pass, $device_id, $header);
                 if($regis == FALSE) {   
-                    $reg = $reg+1;
-                    if($reg<=3) {
-                        goto register;
-                    } else {
-                        echo "[!] ".date('H:i:s')." | Registrasi Gagal, santuy..\n\n";
-                    }  
+                    echo "[!] ".date('H:i:s')." | Registrasi Gagal, santuy..\n\n";
+
                 } else {
                     $bearer = $regis->token;
                     $regis_id = $regis->user->id;
                     $referral = $regis->user->referral_code;
 
-                    $rf=0;
                     refer:
                     $_referal = $milieu->reff($reff_code, $bearer, $header);
                     if($_referal == FALSE) { 
-                        $rf = $rf+1;
-                        if($rf<=3) {
-                            goto refer;
-                        } else {
-                            echo "[!] ".date('H:i:s')." | Gagal nge-Refer, santuy..\n\n";
-                        }
+                        echo "[!] ".date('H:i:s')." | Gagal nge-Refer, santuy..\n\n";  
 
                     } else {
                         if($akun_utama == TRUE) {
@@ -686,7 +695,7 @@ switch ($choice) {
                             echo "[".$no++."] ".date('H:i:s')." | Registrasi Berhasil id-".$regis_id." [email:".$email."-pass:".$pass."]\n";
                         } 
 
-                        echo "[i] Email aktivasi telah dikirim, klik link aktivasi tersebut!\n";
+                        echo "[i] ".date('H:i:s')." | Email aktivasi telah dikirim, klik link aktivasi tersebut!\n";
                         echo "[?] Aktivasi email berhasil [Y/N] ";
                         $active = trim(fgets(STDIN));
                         if(strtolower($active) != 'y' ) {
